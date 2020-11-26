@@ -1,0 +1,18 @@
+"benefactors"
+{
+	"base"		"base"
+	"title"		"Benefactors"
+	"maps"		"^bfrs_"
+	"menusystem"	"1"
+
+	"settings"
+	{
+		1
+		{
+			"name"		"bfrs_time_limit"
+			"text"		"Round Time"
+			"type"		"Numeric"
+			"default"	"30"
+		}
+	}
+}
