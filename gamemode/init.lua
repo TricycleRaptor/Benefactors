@@ -19,3 +19,9 @@ function GM:Initialize()
 	GAMEMODE.playermodel = ""
 
 end
+
+function GM:InitPostEntity() -- This is called after the server has initialized the map and all entities within it
+
+	CleanupMapEntities() -- Remove the entities we don't want in the map using the function defined in shared.lua
+
+end
