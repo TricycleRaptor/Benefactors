@@ -3,106 +3,72 @@ GM.Author	= "TricycleRaptor"
 GM.Email	= "arrinbevers@yahoo.com"
 GM.Website  = ""
 GM.TeamBased = true
-
 DeriveGamemode( "base" )
 
---- Globals ---
+-- ███████╗███╗   ██╗██╗   ██╗███╗   ███╗███████╗
+-- ██╔════╝████╗  ██║██║   ██║████╗ ████║██╔════╝
+-- █████╗  ██╔██╗ ██║██║   ██║██╔████╔██║███████╗
+-- ██╔══╝  ██║╚██╗██║██║   ██║██║╚██╔╝██║╚════██║
+-- ███████╗██║ ╚████║╚██████╔╝██║ ╚═╝ ██║███████║
+-- ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝
 
-TEAM_COMBINE = 1
-TEAM_REBELS = 2
+REALM_SH = 0
+REALM_CL = 1
+REALM_SV = 2
 
---- End Globals ---
+--███████╗██╗██╗     ███████╗     █████╗ ██╗   ██╗████████╗ ██████╗ ██╗      ██████╗  █████╗ ██████╗
+--██╔════╝██║██║     ██╔════╝    ██╔══██╗██║   ██║╚══██╔══╝██╔═══██╗██║     ██╔═══██╗██╔══██╗██╔══██╗
+--█████╗  ██║██║     █████╗      ███████║██║   ██║   ██║   ██║   ██║██║     ██║   ██║███████║██║  ██║
+--██╔══╝  ██║██║     ██╔══╝      ██╔══██║██║   ██║   ██║   ██║   ██║██║     ██║   ██║██╔══██║██║  ██║
+--██║     ██║███████╗███████╗    ██║  ██║╚██████╔╝   ██║   ╚██████╔╝███████╗╚██████╔╝██║  ██║██████╔╝
+--╚═╝     ╚═╝╚══════╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝
 
-function GM:CreateTeams()
-
-   team.SetUp(TEAM_COMBINE, "Benefactors", Color(99, 66, 245, 255), true)
-   team.SetUp(TEAM_REBELS, "Resistance", Color(245, 129, 66, 255), true)
-
+local function getRealm(dir)
+	local sub = string.lower(string.sub(dir, 0, 3))
+	local realm = (sub == "cl_" and REALM_CL) or (sub == "sv_" and REALM_SV) or REALM_SH
+	return realm
 end
 
---- Playermodels ---
-
-local bfrs_combine_playermodels = {
-   Model("models/player/combine_super_soldier_player_nova.mdl"), -- Elite Nova Soldier
-   Model("models/player/combine_soldier_prisonguard.mdl") -- Common Nova Soldier
-};
-
-local bfrs_rebel_playermodels = {
-   Model("models/player/group03/male_06.mdl"), -- White male
-   Model("models/player/group03/male_03.mdl"), -- Black male
-   Model("models/player/group03/male_05.mdl"), -- Asian male
-   Model("models/player/group03/female_02.mdl"), -- White female
-   Model("models/player/group03/female_05.mdl"), -- Black female
-   Model("models/player/group03/female_04.mdl") -- Asian female
-};
-
-function GetRandomPlayerModel(ply)
-
-	if(ply:Team() == TEAM_COMBINE) then
-		return table.Random(bfrs_combine_playermodels) --Index a random model from the table of potential models.
-	elseif (ply:Team() == TEAM_REBELS) then
-		return table.Random(bfrs_rebel_playermodels) --Index a random model from the table of potential models.
+local dirSorter = function(a, b)
+	local aRealm = getRealm(a)
+	local bRealm = getRealm(b)
+	if (aRealm == bRealm) then
+		return a < b
 	else
-		return Model("")
+		return aRealm < bRealm
 	end
-
 end
 
---- Playermodels End ---
+local function InitFiles(dir, realm)
+	realm = realm or getRealm(dir)
+	local fil, fol = file.Find(dir.."/*", "LUA")
+	table.sort(fil, dirSorter)
 
---- Map Cleanup ---
-
-function CleanupMapEntities()
-
-	-- This function will remove items we don't want from the map such as healthkits, ammo, and weapons. This is important for loadout integrity and also ensures
-	-- that we can use any maps that may come with items on the map by default, such as the Half-Life 2: Deathmatch maps or something like gm_boreas.
-
-	local items = ents.FindByClass("item_*") -- Parse any item entities spawned by the map like healthkits or ammo for removal
-	local weapons = ents.FindByClass("weapon_*") -- Parse any weapon entities spawned by the map for remvoval
-
-	for k, v in pairs(items) do -- Find each item
-		v:Remove() -- Remove it
-	end
-
-	for k, v in pairs(weapons) do -- Find each weapon
-		v:Remove() -- Remove it
-	end
-
-	--print("[BFRS:] Map entities cleanup operated successfully.")
-
-end
-
---game.CleanUpMap( false, { "bfrs_*" } )
-
--- This is commented out for now, but what the above function does is allow us to put in filters for ignoring entities when a map is cleaned up. This is especially
--- helpful for when we want to start new rounds and reset the map without removing critical entities like the team spawns and objectives established in the setup phase.
--- I added a wildcard example in the filter table that should encompass all entities we'll be making for the gamemode. This can and probably will change later.
-
-function GM:PostCleanupMap() -- This is called after game.CleanUpMap is executed. This will be useful for removing entities we don't want in the map after a reset
-
-	CleanupMapEntities() -- We'll call this again so we can clean up unwanted item and weapon entities that may come with the map by default
-
-end
-
---- Map Cleanup End ---
-
---- Movement ---
-
-hook.Add("OnPlayerHitGround", "BFRS.Land", function(ply, inWater, onFloater, speed)
-	local pingTime = ply:Ping() * 0.001
-	local lockTime = math.max(0.1 - pingTime, 0.01) -- account for player ping weirdness
-	ply._landingTime = CurTime() + lockTime
-end)
-
-hook.Add("StartCommand", "BFRS.LandMovement", function(ply, cmd)
-	if ply._landingTime then
-		if CurTime() <= ply._landingTime then
-			cmd:ClearMovement()
-			cmd:RemoveKey(IN_JUMP)
-		else
-			ply._landingTime = nil
+	for _, v in ipairs(fil or {}) do
+		local fileRealm = realm and realm ~= REALM_SH and realm or getRealm(v)
+		if fileRealm ~= REALM_SV then -- Only cl_ files will pass this check and is loaded only on the client
+			AddCSLuaFile(dir.."/"..v)
+			if CLIENT then
+				include(dir.."/"..v)
+			end
+			print("Loading "..dir.."/"..v.." on the CLIENT...")
 		end
+		if SERVER and fileRealm ~= REALM_CL then -- Only sv_ files will pass this check and is loaded only on the server.
+			include(dir.."/"..v)
+			print("Loading "..dir.."/"..v.." on the server...")
+		end --Everytihng else, such as sh_, will pass both checks and is shared.
 	end
-end)
 
---- Movement End ---
+	for _, folder in ipairs(fol) do
+		local folderRealm = getRealm(folder)
+		if folder == "noload" then continue end
+
+		print("Mounting Folder: "..dir.." on "..(SERVER and "server" or "client"))
+		InitFiles(dir.."/"..folder, folderRealm)
+	end
+
+end
+
+InitFiles(GM.Name.."/gamemode/lib") -- Load libraries first`
+InitFiles(GM.Name.."/gamemode/core") -- Load the core gamemode
+InitFiles(GM.Name.."/gamemode/data") -- load gamemode data - teams, items, weapons, ect. Might be better to make this seperate in the future with a schema gamemode or addon. Works for now.

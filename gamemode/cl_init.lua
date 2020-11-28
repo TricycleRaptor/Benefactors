@@ -1,5 +1,4 @@
 include( "shared.lua" )
-include ("cl_pickteam.lua")
 
 ----------------------------------HUD Elements Start--------------------------------
 

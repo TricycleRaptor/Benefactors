@@ -10,7 +10,7 @@ end
 function GM:PlayerSetModel(ply)
 
 	-- Grab a random model from the two indexed team model tables
-	local mdl = GetRandomPlayerModel(ply) or "models/player/kleiner.mdl"
+	local mdl = GetRandomPlayerModel(ply:Team()) or "models/player/kleiner.mdl"
 	util.PrecacheModel(mdl)
 	ply:SetModel(mdl)
 	-- Playermodel is set
