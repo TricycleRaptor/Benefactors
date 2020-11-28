@@ -14,24 +14,27 @@ function GM:PlayerSetModel(ply)
 	util.PrecacheModel(mdl)
 	ply:SetModel(mdl)
 	-- Playermodel is set
-   
 end
 
-function GM:PlayerFootstep(ply, pos, foot, sound, volume, filter)
-
+function GM:PlayerFootstep(ply, pos, foot)
 	if(ply:Team() == TEAM_COMBINE) then
-
 		if( ply:GetVelocity():Length2D() > 150 ) then -- Gear shuffle when moving at a certain speed
+			local soundFile = foot == 0 and "NPC_MetroPolice.RunFootstepLeft" or "NPC_MetroPolice.RunFootstepRight"
+			if CLIENT and ply == LocalPlayer() then
+				ply:EmitSound(soundFile, 70, 100, 0.7)
+			elseif SERVER then
+				local filter = RecipientFilter()
+				filter:AddPAS(ply:GetPos())
+				filter:RemovePlayer(ply)
 
-			if( foot == 0 ) then
-				ply:EmitSound( "NPC_MetroPolice.RunFootstepLeft" );
-			else
-				ply:EmitSound( "NPC_MetroPolice.RunFootstepRight" );
+				local footSound = CreateSound(ply, soundFile, filter)
+				footSound:SetSoundLevel(75)
+				footSound:Play()
 			end
 
 			return true
 
-		else
+		elseif ply:OnGround() then
 			return false -- No gear shuffle
 		end
 
