@@ -5,6 +5,7 @@
 
 TEAM_FRAME = TEAM_FRAME or nil
 function GM:ShowTeam()
+	GAMEMODE:HideTeam()
 	TEAM_FRAME = vgui.Create( "DFrame" )
 	self.TeamSelectFrame = TEAM_FRAME
 
@@ -125,12 +126,8 @@ function GM:ShowTeam()
 end
 
 function GM:HideTeam()
-	local teamFrame = self.TeamSelectFrame or TEAM_FRAME
-	if ( IsValid(teamFrame) ) then
-		teamFrame:Remove()
-		teamFrame = nil
+	if ( IsValid(TEAM_FRAME) ) then
+		TEAM_FRAME:Remove()
+		TEAM_FRAME = nil
 	end
 end
-
-GM:HideTeam()
-GM:ShowTeam()
