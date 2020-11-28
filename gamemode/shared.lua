@@ -3,6 +3,7 @@ GM.Author	= "TricycleRaptor"
 GM.Email	= "arrinbevers@yahoo.com"
 GM.Website  = ""
 GM.TeamBased = true
+GM.Color = Color(195, 198, 31,255)
 DeriveGamemode( "base" )
 
 -- ███████╗███╗   ██╗██╗   ██╗███╗   ███╗███████╗

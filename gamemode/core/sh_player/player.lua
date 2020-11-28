@@ -117,10 +117,12 @@ function GM:OnPlayerChangedTeam( ply, oldteam, newteam )
 		local Pos = ply:EyePos()
 		ply:Spawn()
 		ply:SetPos( Pos )
+		ply:Spectate(OBS_MODE_ROAMING)
 
 	elseif ( oldteam == TEAM_SPECTATOR ) then
 
 		-- If we're changing from spectator, join the game
+		ply:UnSpectate()
 		ply:Spawn()
 
 	else

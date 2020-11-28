@@ -3,36 +3,46 @@
 TEAM_COMBINE = 1
 TEAM_REBELS = 2
 
+local logoParams = "smooth"
+
+GM.Teams = {
+	[TEAM_COMBINE] = {
+		name = "Benefactors",
+		color = Color(99, 66, 245, 255),
+		joinable = true,
+		logo = CLIENT and Material("vgui/bfrs/team_benefactors.png", logoParams),
+		models = {
+			Model("models/player/combine_super_soldier_player_nova.mdl"), -- Elite Nova Soldier
+			Model("models/player/combine_soldier_prisonguard.mdl") -- Common Nova Soldier
+		}
+	},
+	[TEAM_REBELS]= {
+		name = "Resistance",
+		color = Color(245, 129, 66, 255),
+		joinable = true,
+		logo = CLIENT and Material("vgui/bfrs/team_resistance.png", logoParams),
+		models = {
+			Model("models/player/group03/male_06.mdl"), -- White male
+			Model("models/player/group03/male_03.mdl"), -- Black male
+			Model("models/player/group03/male_05.mdl"), -- Asian male
+			Model("models/player/group03/female_02.mdl"), -- White female
+			Model("models/player/group03/female_05.mdl"), -- Black female
+			Model("models/player/group03/female_04.mdl") -- Asian female
+		}
+	}
+}
+
+
 --- End Globals ---
 
 function GM:CreateTeams()
-	team.SetUp(TEAM_COMBINE, "Benefactors", Color(99, 66, 245, 255), true)
-	team.SetUp(TEAM_REBELS, "Resistance", Color(245, 129, 66, 255), true)
+	for teamKey, teamData in pairs(GAMEMODE.Teams) do
+		team.SetUp(teamKey, teamData.name, teamData.color, teamData.joinable)
+	end
 end
 
 --- Playermodels ---
-
-local bfrs_combine_playermodels = {
-	Model("models/player/combine_super_soldier_player_nova.mdl"), -- Elite Nova Soldier
-	Model("models/player/combine_soldier_prisonguard.mdl") -- Common Nova Soldier
-};
-
-local bfrs_rebel_playermodels = {
-	Model("models/player/group03/male_06.mdl"), -- White male
-	Model("models/player/group03/male_03.mdl"), -- Black male
-	Model("models/player/group03/male_05.mdl"), -- Asian male
-	Model("models/player/group03/female_02.mdl"), -- White female
-	Model("models/player/group03/female_05.mdl"), -- Black female
-	Model("models/player/group03/female_04.mdl") -- Asian female
-};
-
-function GetRandomPlayerModel(team)
-	if(team == TEAM_COMBINE) then
-		return table.Random(bfrs_combine_playermodels) --Index a random model from the table of potential models.
-	elseif (team == TEAM_REBELS) then
-		return table.Random(bfrs_rebel_playermodels) --Index a random model from the table of potential models.
-	else
-		return Model("")
-	end
-
+function GetRandomPlayerModel(teamKey)
+	local teamData = GAMEMODE.Teams[teamKey]
+	return teamData and teamData.models and table.Random(teamData.models) or nil
 end
